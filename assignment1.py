@@ -42,10 +42,10 @@ def GenPop(pop, cities):
 def fitness(cities, Population): # Also used as a tournament selector
     
     reports = np.zeros((len(Population),1))
+    #print("This should be array 3", int(len(Population[3])))
     
     for i in range(len(Population)):
             reports[i] = Distance(cities, Population[i])
-            
             
     Scorecard = np.asarray(list(zip(Population,reports)), dtype=object)
     
@@ -150,21 +150,25 @@ def Mutator(Population, mutation):
 
 def Selection(Population, mutation, NCpool, fitcut, tour):
     newPop = np.zeros((len(Population), len(Population[0])))
+    mPop = np.zeros((len(Population), len(Population[0])))
     Spop = []
     for i in range(NCpool):
             rints = rng.integers(low=0, high=fitcut, size=10)
             SeedPop = Population[rints]
             Best = fitness(tour, SeedPop)
-            c1,c2 = pmx_pair(list(Best[0]), list(Best[1]))
+            c1,c2 = pmx_pair(list(Best[0,0]), list(Best[1,0]))
             Spop.append(c1)
             Spop.append(c2)
     Spop = np.asarray(Spop)
+    print("orig pop as list: ", list(Population))
     print(Population[fitcut:].shape, Spop.shape)
     Tpop = np.concatenate((Population[fitcut:], Spop), axis=0)
     newPop = fitness(tour, Tpop)
     newPop = newPop[:,0]
     cutpoint = int(len(Population) - len(Population[:fitcut]))
-    newPop = np.concatenate((Population[:fitcut,0], newPop[:cutpoint]), axis=0)
+    print("This should be array 3", newPop[3])
+    newPop = np.concatenate((newPop[:cutpoint], Population[:fitcut,0]), axis=0)
+    print(newPop.shape)
     
     return newPop
 
@@ -187,7 +191,6 @@ def Generation(problemsize, population, runs, mutation, fitcut, NCpool):
         Champs[i] = Results[0,0]
         Champ_dist[i] = Results[0,1]
         Population = Selection(Population, mutation, NCpool, fitcut, tour)
-        print("This is in generation Population shape is: ", Population.shape)
         #Population = Results[:fitcut,0]
         #Population = Mutator(Population, mutation)
         #SeedPop = GenPop(population, len(tour))
