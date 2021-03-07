@@ -59,6 +59,7 @@ def Mutate(a):
     return a
 
 def pmx(a, b):
+    # Denne er lånt fra LF til uke 3 IN3050
     half = len(a) // 2
     start = np.random.randint(0, len(a)-half)
     stop = start+half
@@ -80,47 +81,6 @@ def pmx(a, b):
             child[ind] = b[ind]
             
     return np.asarray(child)
-"""
-Anbefalingen er at:
-
-lag en tom array med Population*n_byer
-
-sett newPop = np.zeros((Population, cities))
-Sett newPop[]
-new_Pop[: int(len(new_Pop)*0.4)] = elites
-
-
-
-Extraction theorycrafting: 
-
-
-N = 40
-CS = 24
-tour = permutations(range(CS))
-Tourlist = np.zeros((N, CS)).astype('int')
-
-for i in range(N):
-  Tourlist[i,:] = next(tour)
-
-
-TcityNames = Cities[0,Tcity]
-Rtour = np.random.randint(N,size=1)
-print(Distance(Tourlist[Rtour][0]))
-
-"""
-
-
-#Problem defined below this line 
-
-City_number = 6
-Population_number = 30
-
-
-Tourlist = GenPop(Population_number, City_number)
-fitcut = 0.4
-
-# ----------------------------------------------------------------------------------------
-# Developing selection below this line here
 
 def Selection(Population, cities, fitcut, M_rate):
   Fpop, Fdist = fitness(Population, dist=1)
@@ -174,26 +134,43 @@ def Generation(SeedPpop, SeedCities, runs, fitcut, M_rate):
     #print("Genstat stuff:", S_dist[0], S_dist[-1,0], np.mean(S_dist[:]), np.std(S_dist[:]))
     Champs[i] = Population[0]
     Champ_dist[i] = S_dist[0]
-  return Champs, Champ_dist
+  return Champs, Champ_dist, Genstats
+
+
+#Problem defined below this line 
+
+City_number = 6
+Population_number = 30
+
+
+Tourlist = GenPop(Population_number, City_number)
+fitcut = 0.4
+
+
 
 City_number = 24
 Population_number = [100, 200, 400]
 fitcut = 0.4
-runs = 70
+runs = 20
 M_rate = 0.5
 B_routes = np.zeros((runs, City_number, 3))
 B_dist = np.zeros((runs, 3))
 Timings = np.zeros(3)
 for i in range(3):
   start = time.time()
-  Cityroutes, Cdistances = Generation(Population_number[i], City_number, runs, fitcut, M_rate)
+  Cityroutes, Cdistances, Genstats = Generation(Population_number[i], City_number, runs, fitcut, M_rate)
   stop = time.time()
   Timings[i] = stop - start
-  #print("Cityroutes is:", Cityroutes.shape)
-  #print("B_routes is:", B_routes[:,:,i].shape)
   B_routes[:,:,i] = Cityroutes
   B_dist[:,i] = Cdistances[:,0]
+  P_best = np.asarray(sorted(list(Genstats[:,0].tolist())))
+  P_worst = np.asarray(sorted(list(Genstats[:,1].tolist())))
+  P_mean = np.mean(np.asarray(sorted(list(Genstats[:,2].tolist()))))
+  P_std = np.std(np.asarray(sorted(list(Genstats[:,3].tolist()))))
+  print("Fitness of population ", Population_number[i], "was:", "best:", P_best[0], "worst:", P_worst[-1], "mean:", P_mean, "std:", P_std)
+  print(" ")
   print("Best route from pop", Population_number[i], "was route ", Clist[Cityroutes[-1].astype('int')], "With a distance of: ", Cdistances[-1,0], "and runtime of:", Timings[i], "Seconds")
+  print(" ")
 
 
 x = np.arange(runs)
